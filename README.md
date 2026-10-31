@@ -1,13 +1,10 @@
-老师把签到机制改回来吧求求了，我错了我会小声使用的QAQ。
-
 # XMU 厦大畅课助手
 
 厦门大学畅课平台（`lnt.xmu.edu.cn`）的浏览器用户脚本。
 
 ## 安装
 
-**[点此安装脚本](https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.user.js)**（需先装好 Tampermonkey 等用户脚本管理器）
-
+**[点此安装脚本](https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.user.js)**（需先装好 **[Tampermonkey](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/iikmkjmpaadaobahmlepeloendndfphd)** 等用户脚本管理器）
 ## 功能
 
 **资料下载**：课程页右下角悬浮按钮；列出本课程 可下载/不可下载 所有文件，勾选下载。
@@ -15,6 +12,7 @@
 **首页优化**：
 
 - **校徽首页跳转**：点左上角校徽回首页，不再跳数字化教学平台
+- **链接增强**：支持右键菜单、中键及 Ctrl/Command 点击打开链接
 - **页面自适应**：按窗口大小整体缩放首页，一屏显示更多
 - **课程栏滑动**：课程横向列表点击后整页翻动，且支持鼠标滚轮滑动
 - **待办排序**：首页待办按截止时间升序排列
@@ -32,6 +30,7 @@
 
 - 新增设置「首页优化」，对多项功能进行归类
 - 「页面自适应」重写逻辑，缩小页面显示更多条目
+- 新增链接增强，支持新标签页打开。
 - 对多处细节进行优化
 
 ### v0.5

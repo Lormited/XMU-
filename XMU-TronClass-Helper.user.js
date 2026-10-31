@@ -2,17 +2,20 @@
 // @name         XMU-TronClass-Helper
 // @name:zh-CN   XMU 厦大畅课助手
 // @namespace    https://github.com/Lormited/XMU-TronClass-Helper
-// @version      0.6.1
+// @version      0.6.3
 // @author       Lormited
 // @license      MIT
 // @homepageURL  https://github.com/Lormited/XMU-TronClass-Helper
 // @updateURL    https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.user.js
 // @downloadURL  https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.user.js
-// @description  XMU 厦大畅课助手：资料下载 / 首页优化（校徽首页跳转 · 页面自适应 · 课程栏滑动 · 待办排序 · 签到列表替换）/ 界面精简 / 顶栏精简
+// @description  XMU 厦大畅课助手：资料下载 / 首页优化（校徽首页跳转 · 链接增强 · 页面自适应 · 课程栏滑动 · 待办排序 · 签到列表替换）/ 界面精简 / 顶栏精简
 // @match        https://lnt.xmu.edu.cn/*
 // @grant        GM_download
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        GM_getResourceText
+// @grant        unsafeWindow
+// @resource     xmuStyles https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.css?v=0.6.3
 // @connect      c-media.xmu.edu.cn
 // @run-at       document-end
 // ==/UserScript==
@@ -25,13 +28,12 @@
   const WHEEL_STEP = 1.6;     // 课程栏滚轮灵敏度
   const FIT_SCALE = 0.85;     // 页面自适应：整页缩放到窗口的 85%
   const POLL = 1300;          // 轮询间隔(ms)
-  const FETCH_CODE = false;
 
   // ─── 基础 ──────────────────────────────────────────────────
   const DEFAULTS = {
     feat_download: true, feat_home: true, feat_chrome: true,
     feat_topbar: false, feat_signin: false, feat_homelogo: false, feat_fit: false, feat_coursebar: false,
-    feat_todo: true,
+    feat_todo: true, feat_links: true,
     chrome_sidebar: true, chrome_footer: true, chrome_ai: true,
   };
 
@@ -50,6 +52,11 @@
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const element = (tag, props, parent) => {
+    const node = Object.assign(document.createElement(tag), props);
+    parent?.appendChild(node);
+    return node;
+  };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -61,15 +68,14 @@
   const REPO = 'https://github.com/Lormited/XMU-TronClass-Helper';
   const VERSION = typeof GM_info === 'undefined' ? '' : GM_info.script.version;   // 取自头部 @version
 
-  function style(id, css) {
-    if (document.getElementById(id)) return;
-    document.documentElement.appendChild(Object.assign(document.createElement('style'), { id, textContent: css }));
-  }
+  element('style', { id: 'xmu-styles', textContent: GM_getResourceText('xmuStyles') }, document.documentElement);
 
-  // 轮询：立即跑一次，随后按 POLL 重复；定时器挂在 m.poller 上
-  const poll = (m, ...fns) => {
-    const ids = fns.map((f) => { const run = f.bind(m); run(); return setInterval(run, POLL); });
-    m.poller = { stop: () => ids.forEach(clearInterval) };
+  // 轮询：立即跑一次，随后按 POLL 重复
+  const poll = (m, fn) => {
+    clearInterval(m.timer);
+    const run = fn.bind(m);
+    run();
+    m.timer = setInterval(run, POLL);
   };
 
   // 平滑滚动：即时启动，末尾自然收住
@@ -105,10 +111,7 @@
   async function blobDownload(url, name) {
     try {
       const blob = await (await fetch(url)).blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.documentElement.appendChild(a);
+      const a = element('a', { href: URL.createObjectURL(blob), download: name }, document.documentElement);
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 60000);
@@ -121,64 +124,32 @@
 
     init() {
       if (!courseId()) return;
-      style('xmu-dl', `
-        .xmu-fab{position:fixed;right:18px;bottom:18px;z-index:2147483600;height:36px;padding:0 18px;border:none;border-radius:3px;background:#003c88;color:#fff;font-size:14px;line-height:1;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,60,136,.28);}
-        .xmu-fab:focus{background:#003c88;color:#fff;}
-        .xmu-fab:hover{background:#092666;color:#fff;}
-        .xmu-fab:focus-visible{outline:2px solid #fff;outline-offset:-4px;}
-        .xmu-panel{position:fixed;right:18px;bottom:66px;z-index:2147483600;width:360px;max-width:calc(100vw - 36px);background:#fff;border:1px solid #d8d8d8;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.16);display:none;overflow:hidden;color:#333;font-family:inherit;}
-        .xmu-panel .xmu-dl-hd,.xmu-panel .xmu-dl-ft{padding:12px 16px;}
-        .xmu-panel .xmu-dl-hd{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;font-weight:600;font-size:14px;}
-        .xmu-panel .xmu-dl-ft{border-top:1px solid #eee;}
-        .xmu-panel .xmu-dl-bar{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid #f2f2f2;font-size:13px;}
-        .xmu-panel .xmu-dl-bar label{display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;}
-        .xmu-panel .xmu-dl-count{font-size:12px;color:#737373;}
-        .xmu-panel .xmu-dl-list{max-height:320px;overflow:auto;padding:6px 10px;}
-        .xmu-panel .xmu-dl-row{display:flex;align-items:center;gap:9px;padding:7px 6px;border-bottom:1px solid #f5f5f5;font-size:13px;}
-        .xmu-panel .xmu-dl-row:last-child{border-bottom:none;}
-        .xmu-panel .xmu-dl-nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-        .xmu-panel .xmu-dl-sz{flex-shrink:0;font-size:12px;color:#737373;}
-        .xmu-panel .xmu-dl-empty{padding:22px;text-align:center;color:#737373;font-size:13px;}
-        .xmu-panel input[type=checkbox]{accent-color:#003c88;width:15px;height:15px;margin:0;cursor:pointer;}
-        .xmu-panel .xmu-dl-x{border:none;background:none;font-size:20px;line-height:1;color:#999;cursor:pointer;padding:0;}
-        .xmu-panel .xmu-dl-go{width:100%;height:34px;border:none;border-radius:3px;background:#003c88;color:#fff;font-size:14px;cursor:pointer;}
-        .xmu-panel .xmu-dl-go:hover{background:#092666;}
-        .xmu-panel .xmu-dl-go:disabled,.xmu-panel .xmu-dl-go:disabled:hover{background:#d0d5d8;cursor:not-allowed;}
-      `);
-
-      const fab = document.createElement('button');
-      fab.className = 'xmu-fab';
-      fab.textContent = '资料下载';
-      fab.onclick = async () => {
-        if (!this.panel) this.build();
-        const open = this.panel.style.display !== 'block';
-        this.panel.style.display = open ? 'block' : 'none';
-        if (open && !this.files) await this.load();
-      };
-      this.fab = fab;
-      document.documentElement.appendChild(fab);
+      this.fab = element('button', {
+        className: 'xmu-fab', textContent: '资料下载', onclick: async () => {
+          if (!this.panel) this.build();
+          const open = this.panel.style.display !== 'block';
+          this.panel.style.display = open ? 'block' : 'none';
+          if (open && !this.files) await this.load();
+        }
+      }, document.documentElement);
     },
 
     destroy() {
       this.fab?.remove(); this.panel?.remove();
-      document.getElementById('xmu-dl')?.remove();
       this.fab = this.panel = this.files = null;
       this.running = false;
     },
 
     build() {
-      const p = document.createElement('div');
-      p.className = 'xmu-panel';
-      p.innerHTML = `
+      const p = this.panel = element('div', {
+        className: 'xmu-panel', innerHTML: `
         <div class="xmu-dl-hd"><span>资料下载</span><button class="xmu-dl-x">×</button></div>
         <div class="xmu-dl-bar"><label><input type="checkbox" class="xmu-dl-all"> 全选</label><span class="xmu-dl-count"></span></div>
         <div class="xmu-dl-list"></div>
-        <div class="xmu-dl-ft"><button class="xmu-dl-go"></button></div>`;
-      document.documentElement.appendChild(p);
+        <div class="xmu-dl-ft"><button class="xmu-dl-go"></button></div>` }, document.documentElement);
       $('.xmu-dl-x', p).onclick = () => { p.style.display = 'none'; };
       $('.xmu-dl-all', p).onchange = (e) => { (this.files || []).forEach((f) => { f.checked = e.target.checked; }); this.render(); };
       $('.xmu-dl-go', p).onclick = () => this.run();
-      this.panel = p;
     },
 
     async load() {
@@ -214,15 +185,12 @@
       const list = $('.xmu-dl-list', this.panel);
       list.innerHTML = '';
       files.forEach((f) => {
-        const row = document.createElement('div');
-        row.className = 'xmu-dl-row';
-        row.innerHTML = `<input type="checkbox"${f.checked ? ' checked' : ''}><span class="xmu-dl-nm"></span><span class="xmu-dl-sz"></span>`;
+        const row = element('div', { className: 'xmu-dl-row', innerHTML: `<input type="checkbox"${f.checked ? ' checked' : ''}><span class="xmu-dl-nm"></span><span class="xmu-dl-sz"></span>` }, list);
         const nm = $('.xmu-dl-nm', row);
         nm.textContent = f.name;
         nm.title = f.name;
         $('.xmu-dl-sz', row).textContent = f.size ? (f.size / 1048576).toFixed(1) + ' MB' : '';
         $('input', row).onchange = (e) => { f.checked = e.target.checked; this.render(); };
-        list.appendChild(row);
       });
     },
 
@@ -246,13 +214,7 @@
   };
 
   // ─── 首页优化 ──────────────────
-  const HOME_FEATS = [
-    ['homelogo', '校徽首页跳转'],
-    ['fit', '页面自适应'],
-    ['coursebar', '课程栏滑动'],
-    ['todo', '待办排序'],
-    ['signin', '签到列表替换'],
-  ];
+  const HOME_FEATS = ['homelogo', 'links', 'fit', 'coursebar', 'todo', 'signin'];
 
   // 按配置同步一个子功能；状态没变就不动它
   function syncFeat(sub) {
@@ -265,12 +227,16 @@
   modules.home = {
     name: '首页优化', desc: '首页的校徽 / 缩放 / 课程栏 / 待办 / 签到，逐项开关',
 
-    tags: () => HOME_FEATS.map(([id, label]) => [featKey(modules[id]), label]),
+    tags: () => HOME_FEATS.map((id) => [featKey(modules[id]), modules[id].name]),
 
     init() { this.apply(); },
-    apply() { HOME_FEATS.forEach(([id]) => syncFeat(modules[id])); },
+    apply() { HOME_FEATS.forEach((id) => syncFeat(modules[id])); },
     destroy() {
-      HOME_FEATS.forEach(([id]) => { modules[id].destroy?.(); modules[id].on = false; });
+      HOME_FEATS.forEach((id) => {
+        const sub = modules[id];
+        if (sub.on) sub.destroy();
+        sub.on = false;
+      });
     },
   };
 
@@ -280,7 +246,6 @@
     radar: '雷达点名', selfRegistration: '自主签到', roomis: 'ROOMIS',
   };
   const LIST_URL = 'https://c-mobile.xmu.edu.cn/ongoing-rollcall-list';
-  const RC_CACHE = store.get('rc_codes') || {};
 
   // 已签到看 status；student_status 即使已签也仍是 on_call，不能用
   const isSigned = (r) => /fine|late|present|signed/.test(String(r.status || ''));
@@ -297,44 +262,11 @@
     return LIST_URL;
   }
 
-  // 每个签到永远只请求一次：查过就落盘（含 null），之后无论刷新还是重开页面都不再请求
-  async function signinCodeOf(r) {
-    const id = r.rollcall_id;
-    if (!id || id in RC_CACHE) return RC_CACHE[id];
-    RC_CACHE[id] = null;                        // 先占位，同一轮渲染的重复调用不会再发请求
-    const j = await api(`/api/rollcall/${id}/student_rollcalls`).catch(() => null);
-    RC_CACHE[id] = j && j.is_number ? j.number_code || null : null;
-    store.set('rc_codes', RC_CACHE);
-    return RC_CACHE[id];
-  }
-
   modules.signin = {
     name: '签到列表替换', desc: '把首页「常用入口」换成「正在签到」', sub: true,
 
     init() {
       if (!isHome()) return;
-      style('xmu-sc', `
-        .xmu-sc-body{display:flex;flex-direction:column;gap:16px;width:100%;min-width:0;}
-        .xmu-sc-empty{padding:26px 0;text-align:center;color:#737373;font-size:13px;}
-        .xmu-sc-item{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:11px 6px;border-bottom:1px solid #e8eaec;border-radius:8px;cursor:pointer;transition:background .18s ease;}
-        .xmu-sc-item:last-child{border-bottom:none;}
-        .xmu-sc-item:hover{background:#f5f8ff;}
-        .xmu-sc-item:hover .xmu-sc-go:not(.done){color:var(--primary-brand-color-lightened-2);}
-        .xmu-sc-main{min-width:0;flex:1;}
-        .xmu-sc-course{font-size:14px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-        .xmu-sc-meta{font-size:12px;color:#8a9099;margin-top:3px;}
-        /* 码位宽度固定，有码没码都不改变条目尺寸 */
-        .xmu-sc-code{flex-shrink:0;width:48px;text-align:right;font-size:11.5px;font-style:normal;line-height:1.6;color:#003c88;}
-        .xmu-sc-code.on{border:1px dashed #9fb6d4;border-radius:8px;background:#f4f8fd;padding:2px 6px;box-sizing:border-box;text-align:center;}
-        .xmu-sc-go{flex-shrink:0;width:24px;height:36px;line-height:36px;text-align:center;font-size:24px;color:var(--primary-brand-color);}
-        .xmu-sc-go i{position:relative;top:3px;}
-        .xmu-sc-go.done{color:#1a9c57;}
-        .xmu-sc-refresh{flex-shrink:0;display:flex;color:#8a9099;cursor:pointer;transition:color .18s ease;}
-        .xmu-sc-refresh svg{width:15px;height:15px;}
-        .xmu-sc-refresh:hover{color:var(--primary-brand-color);}
-        .xmu-sc-refresh.loading{color:var(--primary-brand-color);animation:xmu-sc-spin .8s linear infinite;}
-        @keyframes xmu-sc-spin{to{transform:rotate(360deg);}}
-      `);
       this.load();                     // 打开页面取一次，之后靠卡片右上角的刷新按钮
       let tries = 0;                   // 卡片是 SPA 后渲染的：短轮询等它出现（只查 DOM，不发请求）
       this.retry = setInterval(() => {
@@ -364,7 +296,7 @@
       card.dataset.xmuSignin = '1';
       const head = $('.frequent-entry-header', card);
       $('.title', head).textContent = '正在签到';
-      const opts = $('.options', head) || Object.assign(head.appendChild(document.createElement('div')), { className: 'options' });
+      const opts = $('.options', head) || element('div', { className: 'options' }, head);
       opts.innerHTML = '<i class="xmu-sc-refresh" title="刷新"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 4 21 10 15 10"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L21 10"/></svg></i>';
       this.btn = $('.xmu-sc-refresh', opts);
       this.btn.onclick = () => this.refresh();
@@ -372,7 +304,7 @@
       this.render();
     },
 
-    // 手动刷新：只重取雷达列表（大众接口），刷新签到状态与条目；不会重查签到码
+    // 手动刷新签到状态与条目
     async refresh() {
       this.mount();
       this.btn?.classList.add('loading');
@@ -401,9 +333,7 @@
         const course = r.course_title || '课程';
         const signed = isSigned(r);
 
-        const item = document.createElement('div');
-        item.className = 'xmu-sc-item';
-        item.innerHTML = `<div class="xmu-sc-main"><div class="xmu-sc-course"></div><div class="xmu-sc-meta"></div></div><span class="xmu-sc-code"></span><span class="xmu-sc-go"></span>`;
+        const item = element(signed ? 'div' : 'a', { className: 'xmu-sc-item', innerHTML: `<div class="xmu-sc-main"><div class="xmu-sc-course"></div><div class="xmu-sc-meta"></div></div><span class="xmu-sc-go"></span>` });
         $('.xmu-sc-course', item).textContent = course;
         $('.xmu-sc-meta', item).textContent = rollcallType(r);
 
@@ -411,23 +341,10 @@
         go.className = 'xmu-sc-go' + (signed ? ' done' : '');
         go.innerHTML = `<i class="font ${signed ? 'font-rollcall-finish' : 'font-goto'}"></i>`;
         if (signed) item.style.cursor = 'default';
-        else item.onclick = () => window.open(rollcallUrl(r), '_blank');
+        else { item.href = rollcallUrl(r); item.target = '_blank'; item.rel = 'noopener'; }
 
         body.appendChild(item);
-        this.fillCode(item, r, signed);
       });
-    },
-
-    fillCode(item, r, signed) {
-      if (!FETCH_CODE || signed || !r.is_number || !r.rollcall_id) return;
-      const box = $('.xmu-sc-code', item);
-      if (!box) return;
-      const paint = (c) => { box.textContent = c; box.classList.add('on'); };
-      if (r.rollcall_id in RC_CACHE) {
-        if (RC_CACHE[r.rollcall_id]) paint(RC_CACHE[r.rollcall_id]);
-        return;
-      }
-      signinCodeOf(r).then((code) => { if (code && box.isConnected) paint(code); });
     },
   };
 
@@ -449,7 +366,7 @@
     },
 
     destroy() {
-      this.poller.stop();
+      clearInterval(this.timer);
       $$('[data-xmu-hidden]').forEach((el) => { el.style.display = ''; delete el.dataset.xmuHidden; });
     },
 
@@ -499,25 +416,15 @@
 
   // 名字优先级：title/aria > 自身 class > 图标名 > 文字 > 祖先 class
   function topbarName(el) {
-    const aria = (el.getAttribute('title') || el.getAttribute('aria-label') || '').trim();
-    if (aria) return aria.slice(0, 12);
-
     const classesOf = (n) => String(n.getAttribute('class') || '').split(/\s+/);
     const nameOf = (n) => { const c = n && classesOf(n).find((x) => TOPBAR_NAMES[x]); return c && TOPBAR_NAMES[c]; };
-
-    const own = nameOf(el) || nameOf($('i[class], img, svg use', el));
-    if (own) return own;
-
-    const txt = topbarText(el);
-    if (txt) return txt.slice(0, 12);
-
-    let node = el.parentElement, d = 0;
-    while (node && d++ < 4) {
+    const name = (el.getAttribute('title') || el.getAttribute('aria-label') || '').trim()
+      || nameOf(el) || nameOf($('i[class], img, svg use', el)) || topbarText(el);
+    if (name) return name.slice(0, 12);
+    for (let node = el.parentElement, depth = 0; node && depth < 4; node = node.parentElement, depth++) {
       const hit = nameOf(node);
       if (hit) return hit;
-      node = node.parentElement;
     }
-
     const cls = classesOf(el).find((c) => c && !/^(ng-|xmu-)/.test(c));
     return (cls || el.tagName.toLowerCase()).slice(0, 12);
   }
@@ -525,12 +432,10 @@
   // 配置键用结构签名，不用数组下标
   function topbarSig(el) {
     const parts = [];
-    let node = el, d = 0;
-    while (node && d++ < 4) {
+    for (let node = el, depth = 0; node && depth < 4; node = node.parentElement, depth++) {
       const cls = String(node.getAttribute('class') || '').trim().split(/\s+/)
         .filter((c) => c && !/^ng-/.test(c)).sort().slice(0, 3).join('.');
       parts.push(node.tagName + (cls ? '.' + cls : ''));
-      node = node.parentElement;
     }
     return (parts.join('>') + '@' + topbarText(el).replace(/\s+/g, '').slice(0, 10))
       .replace(/[^A-Za-z0-9.@>_-]/g, '');
@@ -539,12 +444,10 @@
   // 收掉因隐藏而缩成 0 宽、却还占着 margin 的空壳父级
   function topbarTidy(el) {
     const bar = $(TOPBAR_ROOT);
-    let node = el.parentElement, d = 0;
-    while (node && node !== bar && d++ < 5) {
+    for (let node = el.parentElement, depth = 0; node && node !== bar && depth < 5; node = node.parentElement, depth++) {
       if (node.getBoundingClientRect().width > 0) break;
       node.setAttribute('data-xmu-shell', '1');
       node.style.display = 'none';
-      node = node.parentElement;
     }
   }
 
@@ -556,7 +459,7 @@
     },
 
     destroy() {
-      this.poller.stop();
+      clearInterval(this.timer);
       $$('[data-xmu-topbar],[data-xmu-shell]').forEach((el) => {
         el.style.display = '';
         el.removeAttribute('data-xmu-topbar');
@@ -586,26 +489,14 @@
 
         if (el.hasAttribute('data-xmu-topbar')) { out.push(el); return; }   // 已关掉的常驻列表
         if (TOPBAR_SKIP.test(cls)) return;
-        if (cls.includes(TOPBAR_RULE)) { if (topbarVisible(el)) out.push(el); return; }
-
-        if (cls.includes(TOPBAR_SPLIT)) {                                   // 校徽 / 课程中心 拆成两个
-          [...el.children].forEach((k) => {
-            if (k.hasAttribute('data-xmu-topbar') || topbarVisible(k)) out.push(k);
-          });
+        if (!cls.includes(TOPBAR_RULE) && cls.includes(TOPBAR_SPLIT)) {
+          out.push(...[...el.children].filter(topbarVisible));
           return;
         }
-
-        if (el.tagName === 'A' || el.getAttribute('role') === 'button') {    // 入口整体一个开关
-          if (topbarVisible(el)) out.push(el);
-          return;
-        }
-
         const kids = [...el.children].filter((k) => !/^(SCRIPT|STYLE|TEMPLATE)$/.test(k.tagName));
-        if (!kids.length) {
-          if (topbarVisible(el) && (topbarText(el) || TOPBAR_ATOM.test(el.tagName))) out.push(el);
-          return;
-        }
-        kids.forEach(walk);
+        const entry = cls.includes(TOPBAR_RULE) || el.tagName === 'A' || el.getAttribute('role') === 'button';
+        if (!entry && kids.length) kids.forEach(walk);
+        else if (topbarVisible(el) && (entry || topbarText(el) || TOPBAR_ATOM.test(el.tagName))) out.push(el);
       };
       [...bar.children].forEach(walk);
 
@@ -645,8 +536,64 @@
     },
   };
 
-  // ─── 校徽首页跳转 ──────────────────────────────────────────
+  // ─── 链接增强 ──────────────────────────────────────────────
   const HOME_URL = 'https://lnt.xmu.edu.cn/user/index#/';
+
+  modules.links = {
+    name: '链接增强', desc: '首页链接支持右键、中键和组合键打开', sub: true,
+
+    init() {
+      if (!isHome()) return;
+      this.onClick = (event) => {
+        if (!isHome()) return;
+        const link = event.target.closest?.('a[href]');
+        if (!link || !link.matches('.xmu-home-link, .todo-link') || !link.closest('main.isStudent')) return;
+        event.stopImmediatePropagation();
+      };
+      document.addEventListener('click', this.onClick, true);
+      document.addEventListener('auxclick', this.onClick, true);
+      poll(this, this.bind);
+    },
+
+    bind() {
+      if (!isHome()) return;
+      const pageDocument = typeof unsafeWindow === 'undefined' ? document : unsafeWindow.document;
+      let root = pageDocument.querySelector('.courses-container');
+      while (root && !root.__vue__) root = root.parentElement;
+      const courses = root?.__vue__?.courses || [];
+      const targets = [];
+      $$('.course-card').forEach((card, index) => {
+        const course = courses[index];
+        if (!course?.url) return;
+        targets.push([card, course.url, '_self']);
+      });
+      $$('.todo-item').forEach((item) => {
+        const source = $('.todo-link[href]', item);
+        if (source) targets.push([item, source.href, source.target || '_self']);
+      });
+      targets.forEach(([item, href, target]) => {
+        if (item.closest('a')) return;
+        if (typeof href !== 'string' || href.includes('{{') || !URL.canParse(href, location.href)) return;
+        const url = new URL(href, location.href);
+        if (!/^https?:$/.test(url.protocol)) return;
+        let link = $(':scope > .xmu-home-link', item);
+        if (!link) {
+          link = element('a', { className: 'xmu-home-link', rel: 'noopener' }, item);
+        }
+        const label = item.textContent.trim() || '打开链接';
+        if (link.href !== url.href) link.href = url.href;
+        if (link.target !== target) link.target = target;
+        if (link.getAttribute('aria-label') !== label) link.setAttribute('aria-label', label);
+      });
+    },
+
+    destroy() {
+      clearInterval(this.timer);
+      document.removeEventListener('click', this.onClick, true);
+      document.removeEventListener('auxclick', this.onClick, true);
+      $$('.xmu-home-link').forEach((link) => link.remove());
+    },
+  };
 
   modules.homelogo = {
     name: '校徽首页跳转', desc: '点左上角校徽回首页，不跳数字化教学平台', sub: true,
@@ -656,7 +603,7 @@
     },
 
     destroy() {
-      this.poller.stop();
+      clearInterval(this.timer);
       $$('.header .logo-padding[data-xmu-logo]').forEach((a) => {
         a.setAttribute('href', a.dataset.xmuLogo);
         delete a.dataset.xmuLogo;
@@ -677,26 +624,12 @@
     name: '页面自适应', desc: '按屏幕比例整体缩放首页，一屏显示更多', sub: true,
 
     init() {
-      style('xmu-fit', `
-        /* 两块内容区改纵向 flex，多出来的高度全给待办 */
-        html.xmu-fit-on main.isStudent{display:flex;flex-direction:column;gap:24px;padding:24px!important;}
-        html.xmu-fit-on main.isStudent>.section1{flex:0 0 auto;margin:0!important;gap:24px!important;}
-        /* 窗口不够高时别把内容压溢：用内容下限（auto），装不下就让页面滚 */
-        html.xmu-fit-on main.isStudent>.section1.wrapper1{flex:1 1 auto;min-height:auto;}
-        html.xmu-fit-on main.isStudent .todo-list-container{flex:1 1 auto;min-height:0;}
-        /* 右列由首张卡吸收高度 */
-        html.xmu-fit-on main.isStudent .section1-right{display:flex;flex-direction:column;}
-        html.xmu-fit-on main.isStudent .section1-right>*:first-child{flex:1 1 auto;min-height:auto;}
-        /* 间距统一 24px */
-        html.xmu-fit-on .main-content{padding-top:0!important;}
-      `);
       poll(this, this.apply);
     },
 
     destroy() {
-      this.poller.stop();
+      clearInterval(this.timer);
       document.documentElement.classList.remove('xmu-fit-on');
-      document.getElementById('xmu-fit')?.remove();
       this.reset();
     },
 
@@ -733,7 +666,7 @@
     },
 
     destroy() {
-      this.poller?.stop();
+      clearInterval(this.timer);
       document.removeEventListener('click', this.onArrow, true);
       this.c?.removeEventListener('wheel', this.onWheel);
       this.c?.removeEventListener('scroll', this.onScroll);
@@ -799,7 +732,7 @@
       poll(this, this.sort);
     },
 
-    destroy() { this.poller.stop(); },
+    destroy() { clearInterval(this.timer); },
 
     sort() {
       const box = $('.todo-list-container');
@@ -807,13 +740,9 @@
       const items = $$('.todo-item', box);
       if (items.length < 2) return;
 
-      // 排过就跳过
-      const key = (i) => ($('.todo-title', i)?.textContent || '') + '|' + ($('.todo-datetime', i)?.textContent || '');
-      const sig = items.map(key).join('##');
-      if (sig === this.sig) return;
-      this.sig = sig;
-
-      items.slice().sort((a, b) => todoDue(a) - todoDue(b)).forEach((i) => box.appendChild(i));
+      const sorted = items.map((item) => ({ item, due: todoDue(item) }))
+        .sort((a, b) => a.due - b.due).map(({ item }) => item);
+      if (items.some((item, index) => item !== sorted[index])) box.append(...sorted);
     },
   };
 
@@ -822,42 +751,12 @@
 
   const settings = {
     init() {
-      style('xmu-set', `
-        .xmu-set-btn{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:2147483647;width:26px;height:48px;padding:0;border:none;border-radius:8px 0 0 8px;cursor:pointer;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,.06);opacity:.35;transition:all .2s ease;display:flex;align-items:center;justify-content:center;}
-        .xmu-set-btn svg{width:15px;height:15px;color:#6b7280;transition:all .2s ease;}
-        .xmu-set-btn:focus{background:#fff;}
-        .xmu-set-btn:hover{opacity:1;width:32px;}
-        .xmu-set-btn:hover svg{color:#003c88;transform:rotate(45deg);}
-        .xmu-set-panel{position:fixed;right:44px;top:50%;transform:translateY(-50%);z-index:2147483647;width:296px;max-height:76vh;overflow:auto;background:#fff;border:1px solid #e8eaed;border-radius:10px;box-shadow:0 12px 48px rgba(0,0,0,.14);display:none;color:#333;font-family:inherit;}
-        .xmu-set-panel .xmu-set-hd{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 12px;border-bottom:1px solid #f0f1f3;}
-        .xmu-set-panel .xmu-set-hd b{font-size:14px;font-weight:600;}
-        .xmu-set-panel .xmu-set-hd button{border:none;background:none;font-size:19px;line-height:1;color:#b8bcc2;cursor:pointer;padding:0 2px;}
-        .xmu-set-panel .xmu-set-hd button:hover{color:#555;}
-        .xmu-set-panel .xmu-set-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;}
-        .xmu-set-panel .xmu-set-item:hover{background:#fafbfc;}
-        .xmu-set-panel .xmu-set-nm{font-size:13px;color:#2b2f36;}
-        .xmu-set-panel .xmu-set-ds{font-size:11px;color:#9aa0a6;margin-top:3px;line-height:1.4;}
-        .xmu-set-panel .xmu-set-tags{position:relative;display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px 12px 30px;background:#fbfcfd;border-top:1px solid #f4f5f7;}
-        .xmu-set-panel .xmu-set-tags::before{content:'';position:absolute;left:17px;top:15px;bottom:16px;width:2px;border-radius:1px;background:#e4e8ee;}
-        .xmu-tag{padding:4px 10px;border:1px solid #e2e5e9;border-radius:11px;background:#fff;font-size:11px;color:#6b7280;cursor:pointer;user-select:none;transition:all .15s ease;}
-        .xmu-tag:hover{border-color:#b9c2cc;color:#3d4450;}
-        .xmu-tag.on{border-color:#003c88;background:#eef3fa;color:#003c88;}
-        .xmu-set-panel .xmu-set-ft{padding:9px 16px 12px;text-align:center;font-size:11px;color:#c2c6cb;border-top:1px solid #f4f5f7;}
-        .xmu-set-panel .xmu-set-ft a{color:inherit;text-decoration:none;}
-        .xmu-set-panel .xmu-set-ft a:hover{color:#003c88;text-decoration:underline;}
-        .xmu-sw{position:relative;flex-shrink:0;width:36px;height:20px;border-radius:10px;background:#dfe2e6;transition:background .18s ease;}
-        .xmu-sw.on{background:#003c88;}
-        .xmu-sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:left .18s ease;}
-        .xmu-sw.on::after{left:18px;}
-      `);
-
-      const btn = document.createElement('button');
-      btn.className = 'xmu-set-btn';
-      btn.title = 'XMU 厦大畅课助手';
+      const btn = this.btn = element('button', { className: 'xmu-set-btn', title: 'XMU 厦大畅课助手' }, document.documentElement);
       btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
       btn.onclick = () => this.toggle();
-      this.btn = btn;
-      document.documentElement.appendChild(btn);
+      poll(this, this.position);
+      window.addEventListener('resize', () => this.position());
+      window.addEventListener('scroll', () => this.position(), true);
 
       // 点击面板外部关闭
       document.addEventListener('click', (e) => {
@@ -871,19 +770,27 @@
       if (!this.panel) this.build();
       this.open = !this.open;
       this.panel.style.display = this.open ? 'block' : 'none';
-      if (this.open) this.refresh();
+      if (this.open) { this.refresh(); this.position(); }
+    },
+
+    position() {
+      const scale = parseFloat(getComputedStyle(document.body).zoom) || 1;
+      const headerBottom = clamp(($('.header')?.getBoundingClientRect().bottom || 0) * scale, 0, innerHeight);
+      const center = (headerBottom + innerHeight) / 2;
+      this.btn.style.top = center + 'px';
+      if (!this.open) return;
+      this.panel.style.top = center + 'px';
+      this.panel.style.maxHeight = Math.max(0, innerHeight - headerBottom - 24) + 'px';
     },
 
     build() {
-      const p = document.createElement('div');
-      p.className = 'xmu-set-panel';
-      p.innerHTML = `
+      const p = this.panel = element('div', {
+        className: 'xmu-set-panel', innerHTML: `
         <div class="xmu-set-hd"><b>XMU 厦大畅课助手</b><button class="xmu-set-x">×</button></div>
         <div class="xmu-set-body"></div>
-        <div class="xmu-set-ft"><a href="${REPO}" target="_blank" rel="noopener">v${VERSION}</a></div>`;
-      document.documentElement.appendChild(p);
+        <div class="xmu-set-ft"><a href="${REPO}" target="_blank" rel="noopener">v${VERSION}</a></div>`
+      }, document.documentElement);
       $('.xmu-set-x', p).onclick = () => this.toggle();
-      this.panel = p;
     },
 
     refresh() {
@@ -891,17 +798,13 @@
       body.innerHTML = '';
       MODULES.forEach((m) => {
         const on = !!store.get(featKey(m));
-        const row = document.createElement('div');
-        row.className = 'xmu-set-item';
-        row.innerHTML = `<div><div class="xmu-set-nm">${m.name}</div><div class="xmu-set-ds">${m.desc}</div></div><div class="xmu-sw${on ? ' on' : ''}"></div>`;
+        const row = element('div', { className: 'xmu-set-item', innerHTML: `<div><div class="xmu-set-nm">${m.name}</div><div class="xmu-set-ds">${m.desc}</div></div><div class="xmu-sw${on ? ' on' : ''}"></div>` }, body);
         $('.xmu-sw', row).onclick = (e) => {
           e.stopPropagation();
           store.set(featKey(m), !on);
           on ? m.destroy?.() : m.init?.();
           this.refresh();
         };
-        body.appendChild(row);
-
         const tags = on && m.tags?.();
         if (tags?.length) body.appendChild(this.buildTags(m, tags));
       });
@@ -913,25 +816,31 @@
 
     // 模块下方的小标签，排不下自动换行
     buildTags(m, tags) {
-      const wrap = document.createElement('div');
-      wrap.className = 'xmu-set-tags';
+      const wrap = element('div', { className: 'xmu-set-tags' });
       tags.forEach(([key, label]) => {
-        const tag = document.createElement('span');
-        tag.className = 'xmu-tag' + (this.tagOn(m, key) ? ' on' : '');
-        tag.textContent = label;
+        const tag = element('span', { className: 'xmu-tag' + (this.tagOn(m, key) ? ' on' : ''), textContent: label }, wrap);
         tag.onclick = () => { this.tagToggle(m, key); m.apply?.(); this.refresh(); };
-        wrap.appendChild(tag);
       });
       return wrap;
     },
   };
 
+  function showUpdate() {
+    if (!VERSION || store.get('seen_version') === VERSION) return;
+    const notice = element('section', { className: 'xmu-update' });
+    notice.setAttribute('role', 'status');
+    notice.innerHTML = `<header><strong></strong><button type="button" aria-label="关闭通知">×</button></header><p>样式改为本地缓存加载，精简代码，保留现有功能与样式。</p><a href="${REPO}#更新日志" target="_blank" rel="noopener">查看更新日志</a>`;
+    $('strong', notice).textContent = `畅课助手已更新至 v${VERSION}`;
+    $('button', notice).onclick = () => notice.remove();
+    document.documentElement.appendChild(notice);
+    store.set('seen_version', VERSION);
+  }
+
   // ─── 启动 ──────────────────────────────────────────────────
   // 模块 id 取登记时的键
   // 先把 id 发完再启用：首页优化依赖子模块的 id 拼配置键
   Object.entries(modules).forEach(([id, m]) => { m.id = id; });
-  Object.values(modules).forEach((m) => {
-    if (!m.sub && store.get(featKey(m))) m.init();
-  });
+  MODULES.forEach((m) => { if (store.get(featKey(m))) m.init(); });
   settings.init();
+  showUpdate();
 })();

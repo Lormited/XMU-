@@ -1,0 +1,585 @@
+.xmu-fab {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 2147483600;
+    height: 36px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 3px;
+    background: #003c88;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 2px 10px rgba(0, 60, 136, .28);
+}
+
+.xmu-fab:focus {
+    background: #003c88;
+    color: #fff;
+}
+
+.xmu-fab:hover {
+    background: #092666;
+    color: #fff;
+}
+
+.xmu-fab:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -4px;
+}
+
+.xmu-panel {
+    position: fixed;
+    right: 18px;
+    bottom: 66px;
+    z-index: 2147483600;
+    width: 360px;
+    max-width: calc(100vw - 36px);
+    background: #fff;
+    border: 1px solid #d8d8d8;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .16);
+    display: none;
+    overflow: hidden;
+    color: #333;
+    font-family: inherit;
+}
+
+.xmu-panel .xmu-dl-hd,
+.xmu-panel .xmu-dl-ft {
+    padding: 12px 16px;
+}
+
+.xmu-panel .xmu-dl-hd {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.xmu-panel .xmu-dl-ft {
+    border-top: 1px solid #eee;
+}
+
+.xmu-panel .xmu-dl-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 16px;
+    border-bottom: 1px solid #f2f2f2;
+    font-size: 13px;
+}
+
+.xmu-panel .xmu-dl-bar label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.xmu-panel .xmu-dl-count {
+    font-size: 12px;
+    color: #737373;
+}
+
+.xmu-panel .xmu-dl-list {
+    max-height: 320px;
+    overflow: auto;
+    padding: 6px 10px;
+}
+
+.xmu-panel .xmu-dl-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 6px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 13px;
+}
+
+.xmu-panel .xmu-dl-row:last-child {
+    border-bottom: none;
+}
+
+.xmu-panel .xmu-dl-nm {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.xmu-panel .xmu-dl-sz {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: #737373;
+}
+
+.xmu-panel .xmu-dl-empty {
+    padding: 22px;
+    text-align: center;
+    color: #737373;
+    font-size: 13px;
+}
+
+.xmu-panel input[type=checkbox] {
+    accent-color: #003c88;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.xmu-panel .xmu-dl-x {
+    border: none;
+    background: none;
+    font-size: 20px;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+}
+
+.xmu-panel .xmu-dl-go {
+    width: 100%;
+    height: 34px;
+    border: none;
+    border-radius: 3px;
+    background: #003c88;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.xmu-panel .xmu-dl-go:hover {
+    background: #092666;
+}
+
+.xmu-panel .xmu-dl-go:disabled,
+.xmu-panel .xmu-dl-go:disabled:hover {
+    background: #d0d5d8;
+    cursor: not-allowed;
+}
+
+.xmu-sc-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+}
+
+.xmu-sc-empty {
+    padding: 26px 0;
+    text-align: center;
+    color: #737373;
+    font-size: 13px;
+}
+
+.xmu-sc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    padding: 11px 6px;
+    border-bottom: 1px solid #e8eaec;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .18s ease;
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.xmu-sc-item:last-child {
+    border-bottom: none;
+}
+
+.xmu-sc-item:hover {
+    background: #f5f8ff;
+}
+
+.xmu-sc-item:hover .xmu-sc-go:not(.done) {
+    color: var(--primary-brand-color-lightened-2);
+}
+
+.xmu-sc-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.xmu-sc-course {
+    font-size: 14px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.xmu-sc-meta {
+    font-size: 12px;
+    color: #8a9099;
+    margin-top: 3px;
+}
+
+.xmu-sc-go {
+    flex-shrink: 0;
+    width: 24px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    font-size: 24px;
+    color: var(--primary-brand-color);
+}
+
+.xmu-sc-go i {
+    position: relative;
+    top: 3px;
+}
+
+.xmu-sc-go.done {
+    color: #1a9c57;
+}
+
+.xmu-sc-refresh {
+    flex-shrink: 0;
+    display: flex;
+    color: #8a9099;
+    cursor: pointer;
+    transition: color .18s ease;
+}
+
+.xmu-sc-refresh svg {
+    width: 15px;
+    height: 15px;
+}
+
+.xmu-sc-refresh:hover {
+    color: var(--primary-brand-color);
+}
+
+.xmu-sc-refresh.loading {
+    color: var(--primary-brand-color);
+    animation: xmu-sc-spin .8s linear infinite;
+}
+
+@keyframes xmu-sc-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.course-card:has(>.xmu-home-link),
+.todo-item:has(>.xmu-home-link) {
+    position: relative;
+}
+
+.xmu-home-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+.course-card:has(>.xmu-home-link) .ivu-dropdown,
+.todo-item:has(>.xmu-home-link) .todo-link {
+    position: relative;
+    z-index: 2;
+}
+
+.xmu-home-link:focus-visible {
+    outline: 2px solid #003c88;
+    outline-offset: -2px;
+}
+
+html.xmu-fit-on main.isStudent {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px !important;
+}
+
+html.xmu-fit-on main.isStudent>.section1 {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    gap: 24px !important;
+}
+
+html.xmu-fit-on main.isStudent>.section1.wrapper1 {
+    flex: 1 1 auto;
+    min-height: auto;
+}
+
+html.xmu-fit-on main.isStudent .todo-list-container {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+html.xmu-fit-on main.isStudent .section1-right {
+    display: flex;
+    flex-direction: column;
+}
+
+html.xmu-fit-on main.isStudent .section1-right>*:first-child {
+    flex: 1 1 auto;
+    min-height: auto;
+}
+
+html.xmu-fit-on .main-content {
+    padding-top: 0 !important;
+}
+
+.xmu-set-btn {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2147483647;
+    width: 26px;
+    height: 48px;
+    padding: 0;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    background: #fff;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, .06);
+    opacity: .35;
+    transition: opacity .2s ease, width .2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.xmu-set-btn svg {
+    width: 15px;
+    height: 15px;
+    color: #6b7280;
+    transition: all .2s ease;
+}
+
+.xmu-set-btn:focus {
+    background: #fff;
+}
+
+.xmu-set-btn:hover {
+    opacity: 1;
+    width: 32px;
+}
+
+.xmu-set-btn:hover svg {
+    color: #003c88;
+    transform: rotate(45deg);
+}
+
+.xmu-set-panel {
+    position: fixed;
+    right: 44px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2147483647;
+    width: 296px;
+    max-width: calc(100vw - 24px);
+    max-height: 76vh;
+    overflow: auto;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #e8eaed;
+    border-radius: 10px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, .14);
+    display: none;
+    color: #333;
+    font-family: inherit;
+}
+
+.xmu-set-panel .xmu-set-hd {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid #f0f1f3;
+}
+
+.xmu-set-panel .xmu-set-hd b {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.xmu-set-panel .xmu-set-hd button {
+    border: none;
+    background: none;
+    font-size: 19px;
+    line-height: 1;
+    color: #b8bcc2;
+    cursor: pointer;
+    padding: 0 2px;
+}
+
+.xmu-set-panel .xmu-set-hd button:hover {
+    color: #555;
+}
+
+.xmu-set-panel .xmu-set-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+.xmu-set-panel .xmu-set-item:hover {
+    background: #fafbfc;
+}
+
+.xmu-set-panel .xmu-set-nm {
+    font-size: 13px;
+    color: #2b2f36;
+}
+
+.xmu-set-panel .xmu-set-ds {
+    font-size: 11px;
+    color: #9aa0a6;
+    margin-top: 3px;
+    line-height: 1.4;
+}
+
+.xmu-set-panel .xmu-set-tags {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 16px 12px 30px;
+    background: #fbfcfd;
+    border-top: 1px solid #f4f5f7;
+}
+
+.xmu-set-panel .xmu-set-tags::before {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 15px;
+    bottom: 16px;
+    width: 2px;
+    border-radius: 1px;
+    background: #e4e8ee;
+}
+
+.xmu-tag {
+    padding: 4px 10px;
+    border: 1px solid #e2e5e9;
+    border-radius: 11px;
+    background: #fff;
+    font-size: 11px;
+    color: #6b7280;
+    cursor: pointer;
+    user-select: none;
+    transition: all .15s ease;
+}
+
+.xmu-tag:hover {
+    border-color: #b9c2cc;
+    color: #3d4450;
+}
+
+.xmu-tag.on {
+    border-color: #003c88;
+    background: #eef3fa;
+    color: #003c88;
+}
+
+.xmu-set-panel .xmu-set-ft {
+    padding: 9px 16px 12px;
+    text-align: center;
+    font-size: 11px;
+    color: #c2c6cb;
+    border-top: 1px solid #f4f5f7;
+}
+
+.xmu-set-panel .xmu-set-ft a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.xmu-set-panel .xmu-set-ft a:hover {
+    color: #003c88;
+    text-decoration: underline;
+}
+
+.xmu-sw {
+    position: relative;
+    flex-shrink: 0;
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    background: #dfe2e6;
+    transition: background .18s ease;
+}
+
+.xmu-sw.on {
+    background: #003c88;
+}
+
+.xmu-sw::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+    transition: left .18s ease;
+}
+
+.xmu-sw.on::after {
+    left: 18px;
+}
+
+.xmu-update {
+    position: fixed;
+    right: 18px;
+    top: 18px;
+    z-index: 2147483646;
+    width: 320px;
+    max-width: calc(100vw - 36px);
+    box-sizing: border-box;
+    padding: 16px;
+    background: #fff;
+    color: #333;
+    border: 1px solid #e2e5e9;
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .12);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.xmu-update header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.xmu-update button {
+    border: 0;
+    background: none;
+    color: #737373;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.xmu-update p {
+    margin: 10px 0;
+}
+
+.xmu-update a {
+    color: #003c88;
+}
