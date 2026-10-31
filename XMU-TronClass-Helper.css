@@ -583,3 +583,160 @@ html.xmu-fit-on .main-content {
 .xmu-update a {
     color: #003c88;
 }
+
+.xmu-guide {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    isolation: isolate;
+    touch-action: none;
+    color: #fff;
+    font-family: inherit;
+    letter-spacing: 0;
+    animation: xmu-guide-enter .3s ease both;
+}
+
+.xmu-guide-spot {
+    position: fixed;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, .65);
+    border-radius: 12px;
+    box-shadow: 0 0 0 200vmax rgba(12, 15, 19, .78), 0 0 0 4px rgba(255, 255, 255, .08);
+    pointer-events: none;
+    transition: left .24s ease, top .24s ease, width .24s ease, height .24s ease;
+}
+
+.xmu-guide-copy {
+    position: fixed;
+    box-sizing: border-box;
+    width: 320px;
+    max-width: calc(100vw - 40px);
+    text-align: left;
+}
+
+.xmu-guide-copy::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -28px;
+    width: 18px;
+    height: 1px;
+    background: rgba(255, 255, 255, .5);
+}
+
+.xmu-guide-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #c1dfd7;
+}
+
+.xmu-guide-step {
+    color: #b7bcc4;
+    font-variant-numeric: tabular-nums;
+}
+
+.xmu-guide-copy h2 {
+    margin: 0 0 12px;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0;
+}
+
+.xmu-guide-copy p {
+    margin: 0;
+    color: #d1d5dc;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.xmu-guide-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.xmu-guide-actions button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.xmu-guide-actions .xmu-guide-next {
+    padding: 0 18px;
+    background: #fff;
+    color: #182126;
+    font-weight: 600;
+}
+
+.xmu-guide-actions .xmu-guide-next:hover {
+    background: #e0eee9;
+    color: #182126;
+}
+
+.xmu-guide-actions .xmu-guide-skip {
+    padding: 0;
+    background: transparent;
+    color: #c3c8d0;
+}
+
+.xmu-guide-actions .xmu-guide-skip:hover {
+    background: transparent;
+    color: #fff;
+}
+
+.xmu-guide-actions button:focus-visible {
+    outline: 2px solid #b0d9cd;
+    outline-offset: 5px;
+}
+
+html.xmu-guide-active .xmu-set-btn {
+    opacity: 1;
+}
+
+@keyframes xmu-guide-enter {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 720px) {
+    .xmu-guide-copy {
+        width: calc(100% - 40px);
+    }
+
+    .xmu-guide-copy::after {
+        display: none;
+    }
+
+    html.xmu-guide-active .xmu-set-panel {
+        top: 74px !important;
+        right: 20px;
+        width: calc(100% - 40px);
+        max-height: max(100px, calc(100% - 310px)) !important;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .xmu-guide {
+        animation: none;
+    }
+
+    .xmu-guide-spot {
+        transition: none;
+    }
+}

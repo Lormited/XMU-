@@ -2,9 +2,8 @@
 // @name         XMU-TronClass-Helper
 // @name:zh-CN   XMU 厦大畅课助手
 // @namespace    https://github.com/Lormited/XMU-TronClass-Helper
-// @version      0.6.3
+// @version      0.7.0
 // @author       Lormited
-// @license      MIT
 // @homepageURL  https://github.com/Lormited/XMU-TronClass-Helper
 // @updateURL    https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.user.js
 // @downloadURL  https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.user.js
@@ -13,15 +12,15 @@
 // @grant        GM_download
 // @grant        GM_getValue
 // @grant        GM_setValue
-// @grant        GM_getResourceText
 // @grant        unsafeWindow
-// @resource     xmuStyles https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.css?v=0.6.3
 // @connect      c-media.xmu.edu.cn
 // @run-at       document-end
 // ==/UserScript==
 
 (() => {
   'use strict';
+
+  const STYLES = ".xmu-fab {\r\n    position: fixed;\r\n    right: 18px;\r\n    bottom: 18px;\r\n    z-index: 2147483600;\r\n    height: 36px;\r\n    padding: 0 18px;\r\n    border: none;\r\n    border-radius: 3px;\r\n    background: #003c88;\r\n    color: #fff;\r\n    font-size: 14px;\r\n    line-height: 1;\r\n    cursor: pointer;\r\n    font-family: inherit;\r\n    box-shadow: 0 2px 10px rgba(0, 60, 136, .28);\r\n}\r\n\r\n.xmu-fab:focus {\r\n    background: #003c88;\r\n    color: #fff;\r\n}\r\n\r\n.xmu-fab:hover {\r\n    background: #092666;\r\n    color: #fff;\r\n}\r\n\r\n.xmu-fab:focus-visible {\r\n    outline: 2px solid #fff;\r\n    outline-offset: -4px;\r\n}\r\n\r\n.xmu-panel {\r\n    position: fixed;\r\n    right: 18px;\r\n    bottom: 66px;\r\n    z-index: 2147483600;\r\n    width: 360px;\r\n    max-width: calc(100vw - 36px);\r\n    background: #fff;\r\n    border: 1px solid #d8d8d8;\r\n    border-radius: 4px;\r\n    box-shadow: 0 10px 40px rgba(0, 0, 0, .16);\r\n    display: none;\r\n    overflow: hidden;\r\n    color: #333;\r\n    font-family: inherit;\r\n}\r\n\r\n.xmu-panel .xmu-dl-hd,\r\n.xmu-panel .xmu-dl-ft {\r\n    padding: 12px 16px;\r\n}\r\n\r\n.xmu-panel .xmu-dl-hd {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    border-bottom: 1px solid #eee;\r\n    font-weight: 600;\r\n    font-size: 14px;\r\n}\r\n\r\n.xmu-panel .xmu-dl-ft {\r\n    border-top: 1px solid #eee;\r\n}\r\n\r\n.xmu-panel .xmu-dl-bar {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    padding: 9px 16px;\r\n    border-bottom: 1px solid #f2f2f2;\r\n    font-size: 13px;\r\n}\r\n\r\n.xmu-panel .xmu-dl-bar label {\r\n    display: flex;\r\n    align-items: center;\r\n    gap: 6px;\r\n    margin: 0;\r\n    cursor: pointer;\r\n}\r\n\r\n.xmu-panel .xmu-dl-count {\r\n    font-size: 12px;\r\n    color: #737373;\r\n}\r\n\r\n.xmu-panel .xmu-dl-list {\r\n    max-height: 320px;\r\n    overflow: auto;\r\n    padding: 6px 10px;\r\n}\r\n\r\n.xmu-panel .xmu-dl-row {\r\n    display: flex;\r\n    align-items: center;\r\n    gap: 9px;\r\n    padding: 7px 6px;\r\n    border-bottom: 1px solid #f5f5f5;\r\n    font-size: 13px;\r\n}\r\n\r\n.xmu-panel .xmu-dl-row:last-child {\r\n    border-bottom: none;\r\n}\r\n\r\n.xmu-panel .xmu-dl-nm {\r\n    flex: 1;\r\n    overflow: hidden;\r\n    text-overflow: ellipsis;\r\n    white-space: nowrap;\r\n}\r\n\r\n.xmu-panel .xmu-dl-sz {\r\n    flex-shrink: 0;\r\n    font-size: 12px;\r\n    color: #737373;\r\n}\r\n\r\n.xmu-panel .xmu-dl-empty {\r\n    padding: 22px;\r\n    text-align: center;\r\n    color: #737373;\r\n    font-size: 13px;\r\n}\r\n\r\n.xmu-panel input[type=checkbox] {\r\n    accent-color: #003c88;\r\n    width: 15px;\r\n    height: 15px;\r\n    margin: 0;\r\n    cursor: pointer;\r\n}\r\n\r\n.xmu-panel .xmu-dl-x {\r\n    border: none;\r\n    background: none;\r\n    font-size: 20px;\r\n    line-height: 1;\r\n    color: #999;\r\n    cursor: pointer;\r\n    padding: 0;\r\n}\r\n\r\n.xmu-panel .xmu-dl-go {\r\n    width: 100%;\r\n    height: 34px;\r\n    border: none;\r\n    border-radius: 3px;\r\n    background: #003c88;\r\n    color: #fff;\r\n    font-size: 14px;\r\n    cursor: pointer;\r\n}\r\n\r\n.xmu-panel .xmu-dl-go:hover {\r\n    background: #092666;\r\n}\r\n\r\n.xmu-panel .xmu-dl-go:disabled,\r\n.xmu-panel .xmu-dl-go:disabled:hover {\r\n    background: #d0d5d8;\r\n    cursor: not-allowed;\r\n}\r\n\r\n.xmu-sc-body {\r\n    display: flex;\r\n    flex-direction: column;\r\n    gap: 16px;\r\n    width: 100%;\r\n    min-width: 0;\r\n}\r\n\r\n.xmu-sc-empty {\r\n    padding: 26px 0;\r\n    text-align: center;\r\n    color: #737373;\r\n    font-size: 13px;\r\n}\r\n\r\n.xmu-sc-item {\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: space-between;\r\n    gap: 9px;\r\n    padding: 11px 6px;\r\n    border-bottom: 1px solid #e8eaec;\r\n    border-radius: 8px;\r\n    cursor: pointer;\r\n    transition: background .18s ease;\r\n    text-decoration: none !important;\r\n    color: inherit;\r\n}\r\n\r\n.xmu-sc-item:last-child {\r\n    border-bottom: none;\r\n}\r\n\r\n.xmu-sc-item:hover {\r\n    background: #f5f8ff;\r\n}\r\n\r\n.xmu-sc-item:hover .xmu-sc-go:not(.done) {\r\n    color: var(--primary-brand-color-lightened-2);\r\n}\r\n\r\n.xmu-sc-main {\r\n    min-width: 0;\r\n    flex: 1;\r\n}\r\n\r\n.xmu-sc-course {\r\n    font-size: 14px;\r\n    color: #333;\r\n    overflow: hidden;\r\n    text-overflow: ellipsis;\r\n    white-space: nowrap;\r\n}\r\n\r\n.xmu-sc-meta {\r\n    font-size: 12px;\r\n    color: #8a9099;\r\n    margin-top: 3px;\r\n}\r\n\r\n.xmu-sc-go {\r\n    flex-shrink: 0;\r\n    width: 24px;\r\n    height: 36px;\r\n    line-height: 36px;\r\n    text-align: center;\r\n    font-size: 24px;\r\n    color: var(--primary-brand-color);\r\n}\r\n\r\n.xmu-sc-go i {\r\n    position: relative;\r\n    top: 3px;\r\n}\r\n\r\n.xmu-sc-go.done {\r\n    color: #1a9c57;\r\n}\r\n\r\n.xmu-sc-refresh {\r\n    flex-shrink: 0;\r\n    display: flex;\r\n    color: #8a9099;\r\n    cursor: pointer;\r\n    transition: color .18s ease;\r\n}\r\n\r\n.xmu-sc-refresh svg {\r\n    width: 15px;\r\n    height: 15px;\r\n}\r\n\r\n.xmu-sc-refresh:hover {\r\n    color: var(--primary-brand-color);\r\n}\r\n\r\n.xmu-sc-refresh.loading {\r\n    color: var(--primary-brand-color);\r\n    animation: xmu-sc-spin .8s linear infinite;\r\n}\r\n\r\n@keyframes xmu-sc-spin {\r\n    to {\r\n        transform: rotate(360deg);\r\n    }\r\n}\r\n\r\n.course-card:has(>.xmu-home-link),\r\n.todo-item:has(>.xmu-home-link) {\r\n    position: relative;\r\n}\r\n\r\n.xmu-home-link {\r\n    position: absolute;\r\n    inset: 0;\r\n    z-index: 1;\r\n    border-radius: inherit;\r\n}\r\n\r\n.course-card:has(>.xmu-home-link) .ivu-dropdown,\r\n.todo-item:has(>.xmu-home-link) .todo-link {\r\n    position: relative;\r\n    z-index: 2;\r\n}\r\n\r\n.xmu-home-link:focus-visible {\r\n    outline: 2px solid #003c88;\r\n    outline-offset: -2px;\r\n}\r\n\r\nhtml.xmu-fit-on main.isStudent {\r\n    display: flex;\r\n    flex-direction: column;\r\n    gap: 24px;\r\n    padding: 24px !important;\r\n}\r\n\r\nhtml.xmu-fit-on main.isStudent>.section1 {\r\n    flex: 0 0 auto;\r\n    margin: 0 !important;\r\n    gap: 24px !important;\r\n}\r\n\r\nhtml.xmu-fit-on main.isStudent>.section1.wrapper1 {\r\n    flex: 1 1 auto;\r\n    min-height: auto;\r\n}\r\n\r\nhtml.xmu-fit-on main.isStudent .todo-list-container {\r\n    flex: 1 1 auto;\r\n    min-height: 0;\r\n}\r\n\r\nhtml.xmu-fit-on main.isStudent .section1-right {\r\n    display: flex;\r\n    flex-direction: column;\r\n}\r\n\r\nhtml.xmu-fit-on main.isStudent .section1-right>*:first-child {\r\n    flex: 1 1 auto;\r\n    min-height: auto;\r\n}\r\n\r\nhtml.xmu-fit-on .main-content {\r\n    padding-top: 0 !important;\r\n}\r\n\r\n.xmu-set-btn {\r\n    position: fixed;\r\n    right: 0;\r\n    top: 50%;\r\n    transform: translateY(-50%);\r\n    z-index: 2147483647;\r\n    width: 26px;\r\n    height: 48px;\r\n    padding: 0;\r\n    border: none;\r\n    border-radius: 8px 0 0 8px;\r\n    cursor: pointer;\r\n    background: #fff;\r\n    box-shadow: -2px 0 10px rgba(0, 0, 0, .06);\r\n    opacity: .35;\r\n    transition: opacity .2s ease, width .2s ease;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n}\r\n\r\n.xmu-set-btn svg {\r\n    width: 15px;\r\n    height: 15px;\r\n    color: #6b7280;\r\n    transition: all .2s ease;\r\n}\r\n\r\n.xmu-set-btn:focus {\r\n    background: #fff;\r\n}\r\n\r\n.xmu-set-btn:hover {\r\n    opacity: 1;\r\n    width: 32px;\r\n}\r\n\r\n.xmu-set-btn:hover svg {\r\n    color: #003c88;\r\n    transform: rotate(45deg);\r\n}\r\n\r\n.xmu-set-panel {\r\n    position: fixed;\r\n    right: 44px;\r\n    top: 50%;\r\n    transform: translateY(-50%);\r\n    z-index: 2147483647;\r\n    width: 296px;\r\n    max-width: calc(100vw - 24px);\r\n    max-height: 76vh;\r\n    overflow: auto;\r\n    box-sizing: border-box;\r\n    background: #fff;\r\n    border: 1px solid #e8eaed;\r\n    border-radius: 10px;\r\n    box-shadow: 0 12px 48px rgba(0, 0, 0, .14);\r\n    display: none;\r\n    color: #333;\r\n    font-family: inherit;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-hd {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    padding: 14px 16px 12px;\r\n    border-bottom: 1px solid #f0f1f3;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-hd b {\r\n    font-size: 14px;\r\n    font-weight: 600;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-hd button {\r\n    border: none;\r\n    background: none;\r\n    font-size: 19px;\r\n    line-height: 1;\r\n    color: #b8bcc2;\r\n    cursor: pointer;\r\n    padding: 0 2px;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-hd button:hover {\r\n    color: #555;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-item {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    gap: 12px;\r\n    padding: 12px 16px;\r\n    cursor: pointer;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-item:hover {\r\n    background: #fafbfc;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-nm {\r\n    font-size: 13px;\r\n    color: #2b2f36;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-ds {\r\n    font-size: 11px;\r\n    color: #9aa0a6;\r\n    margin-top: 3px;\r\n    line-height: 1.4;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-tags {\r\n    position: relative;\r\n    display: flex;\r\n    flex-wrap: wrap;\r\n    gap: 6px;\r\n    padding: 10px 16px 12px 30px;\r\n    background: #fbfcfd;\r\n    border-top: 1px solid #f4f5f7;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-tags::before {\r\n    content: '';\r\n    position: absolute;\r\n    left: 17px;\r\n    top: 15px;\r\n    bottom: 16px;\r\n    width: 2px;\r\n    border-radius: 1px;\r\n    background: #e4e8ee;\r\n}\r\n\r\n.xmu-tag {\r\n    padding: 4px 10px;\r\n    border: 1px solid #e2e5e9;\r\n    border-radius: 11px;\r\n    background: #fff;\r\n    font-size: 11px;\r\n    color: #6b7280;\r\n    cursor: pointer;\r\n    user-select: none;\r\n    transition: all .15s ease;\r\n}\r\n\r\n.xmu-tag:hover {\r\n    border-color: #b9c2cc;\r\n    color: #3d4450;\r\n}\r\n\r\n.xmu-tag.on {\r\n    border-color: #003c88;\r\n    background: #eef3fa;\r\n    color: #003c88;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-ft {\r\n    padding: 9px 16px 12px;\r\n    text-align: center;\r\n    font-size: 11px;\r\n    color: #c2c6cb;\r\n    border-top: 1px solid #f4f5f7;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-ft a {\r\n    color: inherit;\r\n    text-decoration: none;\r\n}\r\n\r\n.xmu-set-panel .xmu-set-ft a:hover {\r\n    color: #003c88;\r\n    text-decoration: underline;\r\n}\r\n\r\n.xmu-sw {\r\n    position: relative;\r\n    flex-shrink: 0;\r\n    width: 36px;\r\n    height: 20px;\r\n    border-radius: 10px;\r\n    background: #dfe2e6;\r\n    transition: background .18s ease;\r\n}\r\n\r\n.xmu-sw.on {\r\n    background: #003c88;\r\n}\r\n\r\n.xmu-sw::after {\r\n    content: '';\r\n    position: absolute;\r\n    top: 2px;\r\n    left: 2px;\r\n    width: 16px;\r\n    height: 16px;\r\n    border-radius: 50%;\r\n    background: #fff;\r\n    box-shadow: 0 1px 3px rgba(0, 0, 0, .18);\r\n    transition: left .18s ease;\r\n}\r\n\r\n.xmu-sw.on::after {\r\n    left: 18px;\r\n}\r\n\r\n.xmu-update {\r\n    position: fixed;\r\n    right: 18px;\r\n    top: 18px;\r\n    z-index: 2147483646;\r\n    width: 320px;\r\n    max-width: calc(100vw - 36px);\r\n    box-sizing: border-box;\r\n    padding: 16px;\r\n    background: #fff;\r\n    color: #333;\r\n    border: 1px solid #e2e5e9;\r\n    border-radius: 8px;\r\n    box-shadow: 0 6px 24px rgba(0, 0, 0, .12);\r\n    font-family: inherit;\r\n    font-size: 13px;\r\n    line-height: 1.6;\r\n}\r\n\r\n.xmu-update header {\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: space-between;\r\n    gap: 12px;\r\n    font-size: 14px;\r\n}\r\n\r\n.xmu-update button {\r\n    border: 0;\r\n    background: none;\r\n    color: #737373;\r\n    font-size: 20px;\r\n    cursor: pointer;\r\n    padding: 0 4px;\r\n}\r\n\r\n.xmu-update p {\r\n    margin: 10px 0;\r\n}\r\n\r\n.xmu-update a {\r\n    color: #003c88;\r\n}\r\n\r\n.xmu-guide {\r\n    position: fixed;\r\n    inset: 0;\r\n    z-index: 2147483646;\r\n    isolation: isolate;\r\n    touch-action: none;\r\n    color: #fff;\r\n    font-family: inherit;\r\n    letter-spacing: 0;\r\n    animation: xmu-guide-enter .3s ease both;\r\n}\r\n\r\n.xmu-guide-spot {\r\n    position: fixed;\r\n    box-sizing: border-box;\r\n    border: 1px solid rgba(255, 255, 255, .65);\r\n    border-radius: 12px;\r\n    box-shadow: 0 0 0 200vmax rgba(12, 15, 19, .78), 0 0 0 4px rgba(255, 255, 255, .08);\r\n    pointer-events: none;\r\n    transition: left .24s ease, top .24s ease, width .24s ease, height .24s ease;\r\n}\r\n\r\n.xmu-guide-copy {\r\n    position: fixed;\r\n    box-sizing: border-box;\r\n    width: 320px;\r\n    max-width: calc(100vw - 40px);\r\n    text-align: left;\r\n}\r\n\r\n.xmu-guide-copy::after {\r\n    content: '';\r\n    position: absolute;\r\n    top: 50%;\r\n    right: -28px;\r\n    width: 18px;\r\n    height: 1px;\r\n    background: rgba(255, 255, 255, .5);\r\n}\r\n\r\n.xmu-guide-meta {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    margin-bottom: 18px;\r\n    font-size: 11px;\r\n    line-height: 1.5;\r\n    color: #c1dfd7;\r\n}\r\n\r\n.xmu-guide-step {\r\n    color: #b7bcc4;\r\n    font-variant-numeric: tabular-nums;\r\n}\r\n\r\n.xmu-guide-copy h2 {\r\n    margin: 0 0 12px;\r\n    color: #fff;\r\n    font-size: 24px;\r\n    font-weight: 600;\r\n    line-height: 1.4;\r\n    letter-spacing: 0;\r\n}\r\n\r\n.xmu-guide-copy p {\r\n    margin: 0;\r\n    color: #d1d5dc;\r\n    font-size: 14px;\r\n    line-height: 1.8;\r\n}\r\n\r\n.xmu-guide-actions {\r\n    display: flex;\r\n    align-items: center;\r\n    gap: 20px;\r\n    margin-top: 24px;\r\n}\r\n\r\n.xmu-guide-actions button {\r\n    min-height: 38px;\r\n    border: 0;\r\n    border-radius: 6px;\r\n    font: inherit;\r\n    font-size: 13px;\r\n    cursor: pointer;\r\n}\r\n\r\n.xmu-guide-actions .xmu-guide-next {\r\n    padding: 0 18px;\r\n    background: #fff;\r\n    color: #182126;\r\n    font-weight: 600;\r\n}\r\n\r\n.xmu-guide-actions .xmu-guide-next:hover {\r\n    background: #e0eee9;\r\n    color: #182126;\r\n}\r\n\r\n.xmu-guide-actions .xmu-guide-skip {\r\n    padding: 0;\r\n    background: transparent;\r\n    color: #c3c8d0;\r\n}\r\n\r\n.xmu-guide-actions .xmu-guide-skip:hover {\r\n    background: transparent;\r\n    color: #fff;\r\n}\r\n\r\n.xmu-guide-actions button:focus-visible {\r\n    outline: 2px solid #b0d9cd;\r\n    outline-offset: 5px;\r\n}\r\n\r\nhtml.xmu-guide-active .xmu-set-btn {\r\n    opacity: 1;\r\n}\r\n\r\n@keyframes xmu-guide-enter {\r\n    from {\r\n        opacity: 0;\r\n    }\r\n\r\n    to {\r\n        opacity: 1;\r\n    }\r\n}\r\n\r\n@media (max-width: 720px) {\r\n    .xmu-guide-copy {\r\n        width: calc(100% - 40px);\r\n    }\r\n\r\n    .xmu-guide-copy::after {\r\n        display: none;\r\n    }\r\n\r\n    html.xmu-guide-active .xmu-set-panel {\r\n        top: 74px !important;\r\n        right: 20px;\r\n        width: calc(100% - 40px);\r\n        max-height: max(100px, calc(100% - 310px)) !important;\r\n        transform: none;\r\n    }\r\n}\r\n\r\n@media (prefers-reduced-motion: reduce) {\r\n    .xmu-guide {\r\n        animation: none;\r\n    }\r\n\r\n    .xmu-guide-spot {\r\n        transition: none;\r\n    }\r\n}";
 
   const COURSE_STEP = 0.97;   // 课程栏每次翻页的比例，1 = 正好一屏
   const COURSE_DUR = 280;     // 课程栏翻页动画时长(ms)
@@ -68,7 +67,7 @@
   const REPO = 'https://github.com/Lormited/XMU-TronClass-Helper';
   const VERSION = typeof GM_info === 'undefined' ? '' : GM_info.script.version;   // 取自头部 @version
 
-  element('style', { id: 'xmu-styles', textContent: GM_getResourceText('xmuStyles') }, document.documentElement);
+  element('style', { id: 'xmu-styles', textContent: STYLES }, document.documentElement);
 
   // 轮询：立即跑一次，随后按 POLL 重复
   const poll = (m, fn) => {
@@ -549,6 +548,10 @@
         const link = event.target.closest?.('a[href]');
         if (!link || !link.matches('.xmu-home-link, .todo-link') || !link.closest('main.isStudent')) return;
         event.stopImmediatePropagation();
+        if (event.type === 'click' && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && link.target === '_blank') {
+          event.preventDefault();
+          location.assign(link.href);
+        }
       };
       document.addEventListener('click', this.onClick, true);
       document.addEventListener('auxclick', this.onClick, true);
@@ -761,7 +764,7 @@
       // 点击面板外部关闭
       document.addEventListener('click', (e) => {
         if (!this.open) return;
-        if (this.panel?.contains(e.target) || this.btn?.contains(e.target)) return;
+        if (this.panel?.contains(e.target) || this.btn?.contains(e.target) || guide.node?.contains(e.target)) return;
         this.toggle();
       }, true);
     },
@@ -770,7 +773,8 @@
       if (!this.panel) this.build();
       this.open = !this.open;
       this.panel.style.display = this.open ? 'block' : 'none';
-      if (this.open) { this.refresh(); this.position(); }
+      if (this.open) this.refresh();
+      this.position();
     },
 
     position() {
@@ -778,9 +782,11 @@
       const headerBottom = clamp(($('.header')?.getBoundingClientRect().bottom || 0) * scale, 0, innerHeight);
       const center = (headerBottom + innerHeight) / 2;
       this.btn.style.top = center + 'px';
-      if (!this.open) return;
-      this.panel.style.top = center + 'px';
-      this.panel.style.maxHeight = Math.max(0, innerHeight - headerBottom - 24) + 'px';
+      if (this.open) {
+        this.panel.style.top = center + 'px';
+        this.panel.style.maxHeight = Math.max(0, innerHeight - headerBottom - 24) + 'px';
+      }
+      guide.position();
     },
 
     build() {
@@ -808,6 +814,7 @@
         const tags = on && m.tags?.();
         if (tags?.length) body.appendChild(this.buildTags(m, tags));
       });
+      guide.position();
     },
 
     // 子选项读写：模块可自定义，否则用扁平键
@@ -825,11 +832,76 @@
     },
   };
 
+  const guide = {
+    init() {
+      if (store.get('onboarding_seen')) return false;
+      this.previousFocus = document.activeElement;
+      this.bodyInert = document.body.inert;
+      document.body.inert = true;
+      document.documentElement.classList.add('xmu-guide-active');
+      this.node = element('div', { className: 'xmu-guide', innerHTML: `
+        <div class="xmu-guide-spot"></div>
+        <section class="xmu-guide-copy" role="dialog" aria-modal="true" aria-labelledby="xmu-guide-title" aria-describedby="xmu-guide-description">
+          <div class="xmu-guide-meta"><span>畅课助手</span><span class="xmu-guide-step"></span></div>
+          <h2 id="xmu-guide-title"></h2><p id="xmu-guide-description"></p>
+          <div class="xmu-guide-actions"><button type="button" class="xmu-guide-next"></button><button type="button" class="xmu-guide-skip">跳过引导</button></div>
+        </section>` }, document.documentElement);
+      $('.xmu-guide-next', this.node).onclick = () => settings.open ? this.finish() : settings.toggle();
+      $('.xmu-guide-skip', this.node).onclick = () => this.finish();
+      this.onKey = (event) => {
+        if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); this.finish(); }
+        if (event.key !== 'Tab') return;
+        const controls = [settings.btn, ...(settings.open ? $$('button, a[href], [tabindex="0"]', settings.panel) : []), ...$$('button', this.node)].filter((node) => !node.disabled && node.getClientRects().length);
+        const index = controls.indexOf(document.activeElement);
+        event.preventDefault();
+        controls[(index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length].focus();
+      };
+      document.addEventListener('keydown', this.onKey, true);
+      this.node.addEventListener('wheel', (event) => event.preventDefault(), { passive: false });
+      store.set('seen_version', VERSION);
+      this.position();
+      $('.xmu-guide-next', this.node).focus();
+      return true;
+    },
+
+    position() {
+      if (!this.node) return;
+      const open = !!settings.open;
+      if (this.open !== open) {
+        this.open = open;
+        $('.xmu-guide-step', this.node).textContent = open ? '02 / 02' : '01 / 02';
+        $('#xmu-guide-title', this.node).textContent = open ? '只留下你需要的' : '让畅课更合你意';
+        $('#xmu-guide-description', this.node).textContent = open ? '功能可以随时开启或关闭，调整后立即生效。以后也能从右侧齿轮回到这里。' : '资料下载、链接增强、界面精简，都在这里。打开设置，按你的习惯挑选。';
+        $('.xmu-guide-next', this.node).textContent = open ? '开始使用' : '打开设置';
+      }
+      const rect = (open ? settings.panel : settings.btn).getBoundingClientRect();
+      Object.assign($('.xmu-guide-spot', this.node).style, { left: rect.left - 7 + 'px', top: rect.top - 7 + 'px', width: rect.width + 14 + 'px', height: rect.height + 14 + 'px' });
+      const copy = $('.xmu-guide-copy', this.node);
+      const narrow = innerWidth <= 720;
+      const left = narrow ? 20 : rect.left - copy.offsetWidth - 40;
+      const top = narrow ? (open ? rect.bottom + 24 : rect.top - copy.offsetHeight - 28) : rect.top + (rect.height - copy.offsetHeight) / 2;
+      Object.assign(copy.style, { left: Math.max(20, left) + 'px', top: clamp(top, 20, Math.max(20, innerHeight - copy.offsetHeight - 20)) + 'px' });
+    },
+
+    finish() {
+      store.set('onboarding_seen', true);
+      document.removeEventListener('keydown', this.onKey, true);
+      this.node.remove();
+      this.node = null;
+      this.open = undefined;
+      document.body.inert = this.bodyInert;
+      document.documentElement.classList.remove('xmu-guide-active');
+      settings.position();
+      const focus = this.previousFocus?.isConnected && this.previousFocus !== document.body ? this.previousFocus : settings.btn;
+      focus.focus();
+    },
+  };
+
   function showUpdate() {
     if (!VERSION || store.get('seen_version') === VERSION) return;
     const notice = element('section', { className: 'xmu-update' });
     notice.setAttribute('role', 'status');
-    notice.innerHTML = `<header><strong></strong><button type="button" aria-label="关闭通知">×</button></header><p>样式改为本地缓存加载，精简代码，保留现有功能与样式。</p><a href="${REPO}#更新日志" target="_blank" rel="noopener">查看更新日志</a>`;
+    notice.innerHTML = `<header><strong></strong><button type="button" aria-label="关闭通知">×</button></header><p>新增首次使用引导，聚焦设置入口与面板。</p><a href="${REPO}#更新日志" target="_blank" rel="noopener">查看更新日志</a>`;
     $('strong', notice).textContent = `畅课助手已更新至 v${VERSION}`;
     $('button', notice).onclick = () => notice.remove();
     document.documentElement.appendChild(notice);
@@ -842,5 +914,5 @@
   Object.entries(modules).forEach(([id, m]) => { m.id = id; });
   MODULES.forEach((m) => { if (store.get(featKey(m))) m.init(); });
   settings.init();
-  showUpdate();
+  if (!guide.init()) showUpdate();
 })();
