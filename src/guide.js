@@ -9,8 +9,8 @@ const guide = {
       className: 'xmu-guide', innerHTML: `
         <div class="xmu-guide-spot"></div>
         <section class="xmu-guide-copy" role="dialog" aria-modal="true" aria-labelledby="xmu-guide-title" aria-describedby="xmu-guide-description">
-          <div class="xmu-guide-meta"><span>畅课助手</span><span class="xmu-guide-step"></span></div>
-          <h2 id="xmu-guide-title"></h2><p id="xmu-guide-description"></p>
+          <div class="xmu-guide-meta"><span class="xmu-guide-step"></span></div>
+          <h2 id="xmu-guide-title">畅课助手</h2><p id="xmu-guide-description"></p>
           <div class="xmu-guide-actions"><button type="button" class="xmu-guide-next"></button><button type="button" class="xmu-guide-skip">跳过引导</button></div>
         </section>` }, document.documentElement);
     $('.xmu-guide-next', this.node).onclick = () => settings.open ? this.finish() : settings.toggle();
@@ -37,8 +37,7 @@ const guide = {
     if (this.open !== open) {
       this.open = open;
       $('.xmu-guide-step', this.node).textContent = open ? '02 / 02' : '01 / 02';
-      $('#xmu-guide-title', this.node).textContent = open ? '只留下你需要的' : '让畅课更合你意';
-      $('#xmu-guide-description', this.node).textContent = open ? '功能可以随时开启或关闭，调整后立即生效。以后也能从右侧齿轮回到这里。' : '资料下载、链接增强、界面精简，都在这里。打开设置，按你的习惯挑选。';
+      $('#xmu-guide-description', this.node).textContent = open ? '功能可以随时开启或关闭，调整后立即生效。' : '资料下载、首页增强、界面精简，都在这里。';
       $('.xmu-guide-next', this.node).textContent = open ? '开始使用' : '打开设置';
     }
     const rect = (open ? settings.panel : settings.btn).getBoundingClientRect();
