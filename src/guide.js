@@ -67,7 +67,7 @@ function showUpdate() {
   if (!VERSION || store.get('seen_version') === VERSION) return;
   const notice = element('section', { className: 'xmu-update' });
   notice.setAttribute('role', 'status');
-  notice.innerHTML = `<header><strong></strong><button type="button" aria-label="关闭通知">×</button></header><p>新增首次使用引导，聚焦设置入口与面板。</p><a href="${REPO}#更新日志" target="_blank" rel="noopener">查看更新日志</a>`;
+  notice.innerHTML = `<header><strong></strong><button type="button" aria-label="关闭通知">×</button></header><p>修复顶栏应用中心隐藏，新增独立课程菜单开关。</p><a href="${REPO}#更新日志" target="_blank" rel="noopener">查看更新日志</a>`;
   $('strong', notice).textContent = `畅课助手已更新至 v${VERSION}`;
   $('button', notice).onclick = () => notice.remove();
   document.documentElement.appendChild(notice);

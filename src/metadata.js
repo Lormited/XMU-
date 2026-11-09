@@ -2,7 +2,7 @@
 // @name         XMU-TronClass-Helper
 // @name:zh-CN   XMU 厦大畅课助手
 // @namespace    https://github.com/Lormited/XMU-TronClass-Helper
-// @version      0.7.1
+// @version      0.7.2
 // @author       Lormited
 // @homepageURL  https://github.com/Lormited/XMU-TronClass-Helper
 // @updateURL    https://raw.githubusercontent.com/Lormited/XMU-TronClass-Helper/main/XMU-TronClass-Helper.user.js
